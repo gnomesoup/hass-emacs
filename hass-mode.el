@@ -1,6 +1,6 @@
 ;;; Home Assistant autocompletion of entity names for GNU Emacs
 ;;; needs file ~/ha/api_states.txt to exist
-;;; or hass-mode-secrets.el 
+;;; or hass-mode-secrets.el
 ;;; (C) 2019 Greg J. Badros <badros@gmail.com>
 ;;; Use at your own risk -- see LICENSE
 ;;;
@@ -43,11 +43,15 @@
         (mapcar (lambda (a)
                   (cdr (assoc 'entity_id a)))
                 hass-api-states-json))
-  (message "Got %S entities" (length hass-entities))
+  (setq hass-entities-friendly-names
+        (mapcar (lambda (a)
+                  (list (cdr (assoc 'entity_id a))
+                        (cdr (assoc 'friendly_name (assoc 'attributes a)))))
+                hass-api-states-json))
+  (message "hass-mode retrieved %S entities" (length hass-entities))
   (setq ac-user-dictionary hass-entities)
   (setq ac-sources '(ac-source-dictionary ac-source-words-in-same-mode-buffers))
   (ac-clear-dictionary-cache))
-
 
 (defun hass-setup-completion (&optional from-file)
   "Setup autocompletion for home assistant in the current buffer.
@@ -79,3 +83,5 @@ in order to talk to the live server."
   (define-key ac-mode-map (kbd "M-'") 'auto-complete)
   (include-dots-in-symbol-syntax-table)
   )
+
+(provide 'hass-mode)
