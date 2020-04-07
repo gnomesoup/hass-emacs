@@ -23,9 +23,12 @@
   (interactive (list 'interactive))
   (cl-case command
     (interactive (company-begin-backend 'company-hass))
-    (prefix (company-grab-symbol))
+    (prefix (and (eq major-mode 'yaml-mode)
+                 (company-grab-symbol)))
     (candidates (company-hass--candidates arg))
     (annotation (company-hass--annotation arg))
     (meta (company-hass--meta arg))))
 
 (provide 'company-hass)
+
+(company-hass--make-candidate (nth 100 hass-entities-friendly-names))
