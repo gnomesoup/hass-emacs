@@ -1,23 +1,22 @@
 ;;; Company mode setup
+(defun company-hass--fuzzy-match (prefix candidate)
+  (cl-subsetp (string-to-list prefix)
+              (string-to-list candidate)))
+
 (defun company-hass--make-candidate (candidate)
   (let ((text (car candidate))
-        (meta (cadr candidate)))
-    (propertize text 'meta meta)))
+        (annotation (cadr candidate)))
+    (propertize text :annotation annotation)))
 
 (defun company-hass--candidates (prefix)
-  (let (res)
+  (let (resultItem)
     (dolist (item hass-entities-friendly-names)
-      (when (string-prefix-p prefix (car item))
-        (push (company-hass--make-candidate item) res)))
-    res))
-
-(defun company-hass--meta (candidate)
-  (format "This will use %s of %s"
-          (get-text-property 0 'meta candidate)
-          (substring-no-properties candidate)))
+      (when (company-hass--fuzzy-match prefix (car item))
+        (push (company-hass--make-candidate item) resultItem)))
+    resultItem))
 
 (defun company-hass--annotation (candidate)
-  (format " (%s)" (get-text-property 0 'meta candidate)))
+  (format " (%s)" (get-text-property 0 :annotation candidate)))
 
 (defun company-hass (command &optional arg &rest ignored)
   (interactive (list 'interactive))
@@ -26,9 +25,6 @@
     (prefix (and (eq major-mode 'yaml-mode)
                  (company-grab-symbol)))
     (candidates (company-hass--candidates arg))
-    (annotation (company-hass--annotation arg))
-    (meta (company-hass--meta arg))))
+    (annotation (company-hass--annotation arg))))
 
 (provide 'company-hass)
-
-(company-hass--make-candidate (nth 100 hass-entities-friendly-names))
