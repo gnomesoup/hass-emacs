@@ -128,7 +128,10 @@ in order to talk to the live server."
   )
 
 (defun hass-check-config()
-  "Run the Home Assistant check_config service via the restAPI to check your configuration for errors"
+  "Run the Home Assistant check_config service via the restAPI to check your
+configuration for errors. Requires that the variables `HASS_URL_PREFIX' and
+`HASS_BEARER_TOKEN' have been set in the file hass-mode-secrets.el or in your
+user-config"
   (interactive)
   (request
     (concat HASS_URL_PREFIX "/api/services/homeassistant/check_config")
