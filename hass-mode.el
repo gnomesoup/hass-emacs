@@ -22,6 +22,8 @@
     (load-file "./hass-mode-secrets.el"))
 
 (defvar hass-entities)
+(defvar hass-entities-friendly-names)
+(defvar hass-services)
 
 (defun include-dots-in-symbol-syntax-table ()
   (with-syntax-table (syntax-table)
@@ -125,4 +127,24 @@ in order to talk to the live server."
   (include-dots-in-symbol-syntax-table)
   )
 
+(defun hass-check-config()
+  "Run the Home Assistant check_config service via the restAPI to check your configuration for errors"
+  (interactive)
+  (request
+    (concat HASS_URL_PREFIX "/api/services/homeassistant/check_config")
+    :type "POST"
+    :headers `(("Authorization" . ,(concat "Bearer " HASS_BEARER_TOKEN))
+               ("Content-Type" . "application/json"))
+    :parser 'json-read
+    :error (cl-function
+            (lambda (&rest args &key error-thrown &allow-other-keys)
+              (message "Got error: %S" error-thrown)))
+    :success (cl-function
+              (lambda (&key data response &allow-other-keys)
+                (if (not (eq (request-response-status-code response) 200))
+                    (message "Got error code: %S" (request-response-status-code response))
+                  (message "check_config result: %S" (request-response-data response)))))
+    :timeout 8
+    )
+  )
 (provide 'hass-mode)
